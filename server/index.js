@@ -9,8 +9,8 @@ function Player(socket) {
     this.name = ""
     this.game = {}
 
-    this.socket.on("playerMove", function(x, y) {
-        self.game.playerMove(self, x, y)
+    this.socket.on("playerMove", function(col) {
+        self.game.playerMove(self, col)
     })
 }
 
