@@ -3,6 +3,9 @@ var app = require('http').createServer()
 app.listen(8900)
 app.listen(3000)
 
+console.log("Listening on port 8900")
+console.log("Listening on port 3000")
+
 function Player(socket) {
     var self = this
     this.socket = socket
@@ -100,6 +103,7 @@ Game.prototype.playerMove = function(player, col) {
         if (this.board[col][i] == player["name"]) {
             count ++
 			if(count == target) {
+				// TODO: This isn't really a useful way to announce the winner
 				this.announceWin(player, {
 					type: "col",
 					num: col
@@ -117,6 +121,7 @@ Game.prototype.playerMove = function(player, col) {
         if (this.board[i][y] == player["name"]) {
             count ++
 			if(count == target) {
+				// TODO: This isn't really a useful way to announce the winner
 				this.announceWin(player, {
 					type: "col",
 					num: col
@@ -130,17 +135,34 @@ Game.prototype.playerMove = function(player, col) {
 
 	count = 0
 	
-    // TODO: Check diags - This will not work properly for connect 4
-	var xTemp = col
-	var yTemp = y
-	while(yTemp > 0 && xTemp > 0) {
-		xTemp --
-		yTemp --
-	}
+    // Check diags
+	var xTemp = col + 1
+	var yTemp = y + 1
+	count = 1
 	for(;xTemp < this.board.size() && yTemp < this.board[0].size(); xTemp++, yTemp++) {
 		if (this.board[xTemp][yTemp] == player["name"]) {
             count ++
 			if(count == target) {
+				// TODO: This isn't really a useful way to announce the winner
+				this.announceWin(player, {
+					type: "diag",
+					coord: {
+						x: xTemp,
+						y: yTemp
+					},
+					anti: false
+				})
+				return
+			}
+        }
+	}
+	var xTemp = col - 1
+	var yTemp = y - 1
+	for(;xTemp < this.board.size() && yTemp < this.board[0].size(); xTemp--, yTemp--) {
+		if (this.board[xTemp][yTemp] == player["name"]) {
+            count ++
+			if(count == target) {
+				// TODO: This isn't really a useful way to announce the winner
 				this.announceWin(player, {
 					type: "diag",
 					coord: {
@@ -156,16 +178,33 @@ Game.prototype.playerMove = function(player, col) {
 		}
 	}
 	
-	xTemp = col
-	yTemp = y
-	while(yTemp > 0 && xTemp < this.board.size()) {
-		xTemp ++
-		yTemp --
-	}
+	var xTemp = col - 1
+	var yTemp = y + 1
+	count = 1
 	for(;xTemp < this.board.size() && yTemp < this.board[0].size(); xTemp--, yTemp++) {
 		if (this.board[xTemp][yTemp] == player["name"]) {
             count ++
 			if(count == target) {
+				// TODO: This isn't really a useful way to announce the winner
+				this.announceWin(player, {
+					type: "diag",
+					coord: {
+						x: xTemp,
+						y: yTemp
+					},
+					anti: true
+				})
+				return
+			}
+        }
+	}
+	var xTemp = col + 1
+	var yTemp = y - 1
+	for(;xTemp < this.board.size() && yTemp < this.board[0].size(); xTemp++, yTemp--) {
+		if (this.board[xTemp][yTemp] == player["name"]) {
+            count ++
+			if(count == target) {
+				// TODO: This isn't really a useful way to announce the winner
 				this.announceWin(player, {
 					type: "diag",
 					coord: {
