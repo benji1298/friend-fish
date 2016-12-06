@@ -13,6 +13,7 @@ function Player(socket) {
     this.game = {}
 
     this.socket.on("playerMove", function(col) {
+        console.log("playerMove: " + self["name"] + " : " + col)
         self.game.playerMove(self, col)
     })
 }
@@ -77,7 +78,7 @@ Game.prototype.gameOver = function() {
 }
 
 Game.prototype.playerMove = function(player, col) {
-    if (player["name"] !== this.currentTurn || col >= 8 || col < 0) {
+    if (player["name"] !== this.currentTurn || col >= this.board.size() || col < 0) {
         return
     }
 
