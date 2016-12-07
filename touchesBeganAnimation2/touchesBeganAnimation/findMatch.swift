@@ -17,6 +17,13 @@ class findMatch: UIViewController {
     var collision: UICollisionBehavior!
     var name:String = ""
     var oppImage: UIImage?
+    var images: [[UIImageView?]] = [[nil, nil, nil, nil, nil, nil, nil],
+                                [nil, nil, nil, nil, nil, nil, nil],
+                                [nil, nil, nil, nil, nil, nil, nil],
+                                [nil, nil, nil, nil, nil, nil, nil],
+                                [nil, nil, nil, nil, nil, nil, nil],
+                                [nil, nil, nil, nil, nil, nil, nil],
+                                [nil, nil, nil, nil, nil, nil, nil]]
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
@@ -133,6 +140,7 @@ class findMatch: UIViewController {
             
             self.view.insertSubview(squareView, belowSubview: self.board)
             
+            self.images[xCoord][yCoord] = squareView
             
             
             if(self.animator == nil) {
@@ -149,6 +157,10 @@ class findMatch: UIViewController {
         
         SocketIOManager.sharedInstance.socket.on("win") {data, ack in
             print("win")
+            for point in data[1] as! NSArray{
+                self.images[(point as! NSDictionary).value(forKey: "x") as! Int][6-((point as! NSDictionary).value(forKey: "y") as! Int)]?.image = nil
+                self.images[(point as! NSDictionary).value(forKey: "x") as! Int][6-((point as! NSDictionary).value(forKey: "y") as! Int)]?.backgroundColor = data[0] as! String == self.name ? UIColor.green : UIColor.red
+            }
         }
         
         SocketIOManager.sharedInstance.socket.on("draw") {data, ack in
