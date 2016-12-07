@@ -69,9 +69,20 @@ class findMatch: UIViewController {
     }
     
     func endGame(){
-        self.animator.removeAllBehaviors()
-        let gravity = UIGravityBehavior(items: gamePieces)
-        self.animator.addBehavior(gravity)
+        
+        //SocketIOManager.sharedInstance.closeConnection()
+        
+        let deadlineTime = DispatchTime.now() + .seconds(2)
+        DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
+            self.animator.removeAllBehaviors()
+            let gravity = UIGravityBehavior(items: self.gamePieces)
+            self.animator.addBehavior(gravity)
+            
+            //let deadlineTime = DispatchTime.now() + .seconds(3)
+            //DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
+                // TODO: RETURN TO MENU
+            //}
+        }
     }
     
 
@@ -120,7 +131,6 @@ class findMatch: UIViewController {
         SocketIOManager.sharedInstance.socket.on("image") { objects, ack in
             // receive opponents image
             let binaryImage = objects[0] as? String
-            print(binaryImage?.characters.count)
             let decodedData = NSData(base64Encoded: binaryImage!)
             self.oppImage = UIImage(data: decodedData! as Data)
         }
@@ -211,6 +221,7 @@ class findMatch: UIViewController {
         SocketIOManager.sharedInstance.socket.on("draw") {data, ack in
             print("draw")
             self.animatedLabel(message: "It's A Draw!")
+            self.endGame()
            // self.endGame()
         }
         
