@@ -67,10 +67,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate,UINaviga
         imageView.layer.borderColor=UIColor.black.cgColor;
         
         
+        let rect:CGRect = CGRect(x: 0.0, y: 0.0, width: 80.0, height: 150.0)
+        UIGraphicsBeginImageContext(rect.size)
+        img?.draw(in: rect)
+        
+        let image:UIImage = UIGraphicsGetImageFromCurrentImageContext()!
         
         
-        
-        let data = UIImageJPEGRepresentation(img!, 0.75)
+        let data = UIImageJPEGRepresentation(image, 0.75)
         UserDefaults.standard.set(data, forKey: "myImageKey")
         UserDefaults.standard.synchronize()
         

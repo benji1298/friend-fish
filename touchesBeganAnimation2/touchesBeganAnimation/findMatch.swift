@@ -16,6 +16,7 @@ class findMatch: UIViewController {
     var animator: UIDynamicAnimator!
     var collision: UICollisionBehavior!
     var name:String = ""
+    var oppImage: UIImage?
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
@@ -31,26 +32,6 @@ class findMatch: UIViewController {
         
         
         SocketIOManager.sharedInstance.socket.emit("playerMove", xCoord)
-        
-        
-        
-        // TODO: This should be a separate function that adds the tile in response to the server
-        /*squareView = UIView(frame: CGRect(x: xCoord2Pix(i: xCoord), y: 46, width: 40, height: 75))
-         
-         squareView.backgroundColor = UIColor.black
-         view.insertSubview(squareView, belowSubview: board)
-         
-         
-         
-         
-         animator = UIDynamicAnimator(referenceView: view)
-         gravity = UIGravityBehavior(items: [squareView])
-         animator.addBehavior(gravity)
-         
-         collision = UICollisionBehavior(items: [squareView])
-         collision.addBoundary(withIdentifier: "barrier" as NSCopying, from: CGPoint(x: board.frame.origin.x, y: CGFloat(yCoord2Pix(i: yCoord + 1))), to: CGPoint(x:board.frame.origin.x+board.frame.width ,y: CGFloat(yCoord2Pix(i: yCoord + 1))))
-         
-         animator.addBehavior(collision)*/
         
     }
     
@@ -79,6 +60,13 @@ class findMatch: UIViewController {
         
         SocketIOManager.sharedInstance.socket.on("connect") {data, ack in
             print("socket connected")
+            if let imgData = UserDefaults.standard.object(forKey: "myImageKey") as? NSData {
+                print("image found")
+                //let retrievedImg = UIImage(data: imgData as Data)
+                //let imageData = UIImagePNGRepresentation(retrievedImg!)
+                let base64encoding = imgData.base64EncodedString()
+                SocketIOManager.sharedInstance.socket.emit("image", base64encoding)
+            }
         }
         
         SocketIOManager.sharedInstance.socket.on("name") {data, ack in
@@ -86,6 +74,14 @@ class findMatch: UIViewController {
             // name is either X or O for now. should probably use players images?
             self.name = data[0] as! String
             print(self.name)
+        }
+        
+        SocketIOManager.sharedInstance.socket.on("image") { objects, ack in
+            // receive opponents image
+            let binaryImage = objects[0] as? String
+            print(binaryImage?.characters.count)
+            let decodedData = NSData(base64Encoded: binaryImage!)
+            self.oppImage = UIImage(data: decodedData! as Data)
         }
         
         SocketIOManager.sharedInstance.socket.on("startGame") {data, ack in
@@ -115,13 +111,13 @@ class findMatch: UIViewController {
             
             let squareView = UIImageView(frame: CGRect(x: self.xCoord2Pix(i: xCoord), y: 46, width: 40, height: 75))
             
-            print(self.name)
-            print(data[0] as? String)
-            
             if self.name == data[0] as! String, let imgData = UserDefaults.standard.object(forKey: "myImageKey") as? NSData {
-                print("image found")
+                print("my image found")
                 let retrievedImg = UIImage(data: imgData as Data)
                 squareView.image = retrievedImg
+            } else if self.name != data[0] as! String, self.oppImage != nil{
+                print("opp image found")
+                squareView.image = self.oppImage
             }
             else{
                 print("image not found")
@@ -170,6 +166,7 @@ class findMatch: UIViewController {
         }
         
         SocketIOManager.sharedInstance.establishConnection()
+        print("connecting")
         
     }
     
