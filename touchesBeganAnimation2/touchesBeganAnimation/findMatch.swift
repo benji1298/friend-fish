@@ -76,8 +76,9 @@ class findMatch: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
             self.animator.removeAllBehaviors()
             let gravity = UIGravityBehavior(items: self.gamePieces)
-            self.animator.addBehavior(gravity)
-            
+        self.animator.addBehavior(gravity)
+        //self.navigationController?.pushViewController(ViewController, animated: true)
+        
             //let deadlineTime = DispatchTime.now() + .seconds(3)
             //DispatchQueue.main.asyncAfter(deadline: deadlineTime) {
                 // TODO: RETURN TO MENU
@@ -85,7 +86,6 @@ class findMatch: UIViewController {
         }
     }
     
-
     
     
     func xCoord2Pix(i: Int)->Int{
