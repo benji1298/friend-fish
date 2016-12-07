@@ -25,6 +25,9 @@ class findMatch: UIViewController {
                                 [nil, nil, nil, nil, nil, nil, nil],
                                 [nil, nil, nil, nil, nil, nil, nil]]
     
+    var gamePieces = [UIImageView]()
+
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         
         let touchPoint = (touches.first)!.location(in: self.view) as CGPoint
@@ -41,6 +44,37 @@ class findMatch: UIViewController {
         SocketIOManager.sharedInstance.socket.emit("playerMove", xCoord)
         
     }
+    func animatedLabel(message: String){
+        let yourTurn = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 100))
+        yourTurn.center = CGPoint(x: 160, y: 285)
+        yourTurn.textAlignment = .center
+        yourTurn.font = UIFont(name: yourTurn.font.fontName, size: 40)
+        //label.text = "I'am a test label"
+        self.view.addSubview(yourTurn)
+        UIView.animate(withDuration: 2.0, delay: 3.0, usingSpringWithDamping: 1, initialSpringVelocity: 1,options: UIViewAnimationOptions.curveEaseInOut, animations: {
+            yourTurn.alpha = 1.0
+        }, completion: {
+            (finished: Bool) -> Void in
+            
+            //Once the label is completely invisible, set the text and fade it back in
+            yourTurn.text = message
+            
+            // Fade in
+            UIView.animate(withDuration: 2.0, delay: 0.0, options: UIViewAnimationOptions.curveEaseIn, animations: {
+                yourTurn.alpha = 0.0
+            }, completion: nil)
+            
+        })
+        
+    }
+    
+    func endGame(){
+        self.animator.removeAllBehaviors()
+        let gravity = UIGravityBehavior(items: gamePieces)
+        self.animator.addBehavior(gravity)
+    }
+    
+
     
     
     func xCoord2Pix(i: Int)->Int{
@@ -100,6 +134,7 @@ class findMatch: UIViewController {
             // Will be either X or O
             if(data[0] as! String == self.name) {
                 // My turn
+                self.animatedLabel(message: "Your Turn!")
             } else {
                 // Opponents turn
             }
@@ -139,6 +174,7 @@ class findMatch: UIViewController {
             squareView.layer.borderWidth=1.0;
             
             self.view.insertSubview(squareView, belowSubview: self.board)
+            self.gamePieces.append(squareView)
             
             self.images[xCoord][yCoord] = squareView
             
@@ -161,10 +197,21 @@ class findMatch: UIViewController {
                 self.images[(point as! NSDictionary).value(forKey: "x") as! Int][6-((point as! NSDictionary).value(forKey: "y") as! Int)]?.image = nil
                 self.images[(point as! NSDictionary).value(forKey: "x") as! Int][6-((point as! NSDictionary).value(forKey: "y") as! Int)]?.backgroundColor = data[0] as! String == self.name ? UIColor.green : UIColor.red
             }
+            if( data[0] as! String == self.name){
+                self.animatedLabel(message: "You Won!")
+                
+            }
+            else{
+                self.animatedLabel(message: "You Lost :(")
+               
+            }
+            self.endGame()
         }
         
         SocketIOManager.sharedInstance.socket.on("draw") {data, ack in
             print("draw")
+            self.animatedLabel(message: "It's A Draw!")
+           // self.endGame()
         }
         
         SocketIOManager.sharedInstance.socket.on("gameReset") {data, ack in
@@ -174,6 +221,8 @@ class findMatch: UIViewController {
         
         SocketIOManager.sharedInstance.socket.on("gameOver") {data, ack in
             print("gameOver")
+            //self.animatedLabel(message: "Game Over :(")
+            //self.endGame()
             // One or both players responded no to rematch
         }
         
